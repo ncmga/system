@@ -1,0 +1,14 @@
+[Unit]
+Description=dumbserve git repo auto updater
+After=nginx-data.service
+Requires=nginx-data.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker stop dumbserve
+ExecStartPre=-/usr/bin/docker rm dumbserve
+ExecStartPre=/usr/bin/docker create --name dumbserve -p 8080:8080 -e WEBROOT=/usr/share/nginx/html --volumes-from nginx-data cdarwin/dumbserve:0.1.1 --
+ExecStart=/usr/bin/docker start -a dumbserve
+ExecStop=/usr/bin/docker stop dumbserve
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=NGiNX service
+After=nginx-data.service nginx-config.service
+Requires=nginx-data.service nginx-config.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker stop nginx-service
+ExecStartPre=-/usr/bin/docker rm nginx-service
+ExecStartPre=/usr/bin/docker create --name nginx-service -p 80:80 -p 443:443 --volumes-from nginx-data --volumes-from nginx-config nginx
+ExecStart=/usr/bin/docker start -a nginx-service
+ExecStop=/usr/bin/docker stop nginx-service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=NGiNX config volume container
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-/usr/bin/docker create -v /etc/nginx --name nginx-config nginx echo 'nginx config volume container'
+ExecStart=/usr/bin/docker inspect nginx-config
+
+[Install]
+WantedBy=multi-user.target

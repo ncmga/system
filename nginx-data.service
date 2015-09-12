@@ -1,0 +1,13 @@
+[Unit]
+Description=NGiNX data volume container
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-/usr/bin/docker create --name nginx-data -v /usr/share/nginx/html nginx echo 'nginx data volume container'
+ExecStart=/usr/bin/docker inspect nginx-data
+
+[Install]
+WantedBy=multi-user.target
