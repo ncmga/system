@@ -1,14 +1,20 @@
 [Unit]
 Description=dumbserve git repo auto updater
-After=nginx-data.service
-Requires=nginx-data.service
+After=flanneld.service
+Requires=flanneld.service
 
 [Service]
 ExecStartPre=-/usr/bin/docker stop dumbserve
 ExecStartPre=-/usr/bin/docker rm dumbserve
-ExecStartPre=/usr/bin/docker create --name dumbserve -p 8080:8080 -e WEBROOT=/usr/share/nginx/html --volumes-from nginx-data cdarwin/dumbserve:0.1.1 --
+Environment=WEBROOT=/var/www
+ExecStartPre=/usr/bin/docker create \
+--name dumbserve \
+-e WEBROOT=${WEBROOT} \
+-v ${WEBROOT} \
+--expose 8080 \
+cdarwin/dumbserve:0.1.1 --
 ExecStart=/usr/bin/docker start -a dumbserve
+ExecStartPost=/usr/bin/sh -c "/usr/bin/etcdctl set /service/dumbserve/ip $(docker inspect --format='{{.NetworkSettings.IPAddress}}' dumbserve)"
+ExecStartPost=/usr/bin/sh -c "/usr/bin/etcdctl set /service/dumbserve/ports $(docker inspect --format='{{.Config.ExposedPorts}}' dumbserve)"
 ExecStop=/usr/bin/docker stop dumbserve
-
-[Install]
-WantedBy=multi-user.target
+ExecStopPost=/usr/bin/etcdctl rm --recursive /service/dumbserve
