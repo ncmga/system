@@ -4,17 +4,14 @@ After=registrator.service
 Requires=registrator.service
 
 [Service]
-ExecStartPre=-/usr/bin/docker stop dumbserve
-ExecStartPre=-/usr/bin/docker rm dumbserve
+ExecStartPre=-/usr/bin/docker stop %p
+ExecStartPre=-/usr/bin/docker rm %p
 Environment=WEBROOT=/var/www
 ExecStartPre=/usr/bin/docker create \
---name dumbserve \
+--name %p \
 -e WEBROOT=${WEBROOT} \
 -v ${WEBROOT} \
 --expose 8080 \
-cdarwin/dumbserve:0.1.1 --
-ExecStart=/usr/bin/docker start -a dumbserve
-ExecStartPost=/usr/bin/sh -c "/usr/bin/etcdctl set /service/dumbserve/ip $(docker inspect --format='{{.NetworkSettings.IPAddress}}' dumbserve)"
-ExecStartPost=/usr/bin/sh -c "/usr/bin/etcdctl set /service/dumbserve/ports $(docker inspect --format='{{.Config.ExposedPorts}}' dumbserve)"
-ExecStop=/usr/bin/docker stop dumbserve
-ExecStopPost=/usr/bin/etcdctl rm --recursive /service/dumbserve
+cdarwin/%p:0.1.1 --
+ExecStart=/usr/bin/docker start -a %p
+ExecStop=/usr/bin/docker stop %p
