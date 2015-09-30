@@ -11,6 +11,7 @@ ExecStartPre=/usr/bin/docker create \
 --net=host \ 
 --volume=/var/run/docker.sock:/tmp/docker.sock:ro \
 gliderlabs/registrator:latest -internal etcd:///services
+
 ExecStart=/usr/bin/docker start -a %p
 ExecStop=/usr/bin/docker stop %p
 
